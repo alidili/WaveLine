@@ -1,4 +1,4 @@
-package com.lzy.waveline;
+package com.yl.waveline;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -10,8 +10,6 @@ import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.util.AttributeSet;
 import android.util.SparseArray;
-
-import com.lzy.waveline.R;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -6,7 +6,7 @@
     android:orientation="vertical">
 
 
-    <com.lzy.waveline.WaveLineView
+    <com.yl.waveline.WaveLineView
         android:id="@+id/waveLineView"
         android:layout_width="match_parent"
         android:layout_height="200dp"

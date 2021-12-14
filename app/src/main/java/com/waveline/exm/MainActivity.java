@@ -2,7 +2,6 @@ package com.waveline.exm;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.pm.PackageManager;
 import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Bundle;
@@ -12,7 +11,7 @@ import android.os.Message;
 import android.util.Log;
 import android.view.View;
 
-import com.lzy.waveline.WaveLineView;
+import com.yl.waveline.WaveLineView;
 import com.tbruyelle.rxpermissions2.Permission;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 
