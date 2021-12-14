@@ -25,39 +25,35 @@ public class WaveLineView extends RenderView {
     private final float DEFAULT_OFFSET_SPEED = 500F;
     private final int DEFAULT_SENSIBILITY = 10;
 
-    //采样点的数量，越高越精细，但是高于一定限度肉眼很难分辨，越高绘制效率越低
+    // 采样点的数量，越高越精细，但是高于一定限度肉眼很难分辨，越高绘制效率越低
     private int samplingSize;
 
-    //控制向右偏移速度，越小偏移速度越快
+    // 控制向右偏移速度，越小偏移速度越快
     private float offsetSpeed;
-    //平滑改变的音量值
+    // 平滑改变的音量值
     private float volume = 0;
 
-    //用户设置的音量，[0,100]
+    // 用户设置的音量，[0,100]
     private int targetVolume = 50;
 
-    //每次平滑改变的音量单元
+    // 每次平滑改变的音量单元
     private float perVolume;
 
-    //灵敏度，越大越灵敏[1,10]
+    // 灵敏度，越大越灵敏[1,10]
     private int sensibility;
 
-    //背景色
+    // 背景色
     private int backGroundColor = Color.WHITE;
 
-    //波浪线颜色
+    // 波浪线颜色
     private int lineColor;
-    //粗线宽度
-    private int thickLineWidth;
-    //细线宽度
-    private int fineLineWidth;
 
     private final Paint paint = new Paint();
 
     {
-        //防抖动
+        // 防抖动
         paint.setDither(true);
-        //抗锯齿，降低分辨率，提高绘制效率
+        // 抗锯齿，降低分辨率，提高绘制效率
         paint.setAntiAlias(true);
     }
 
@@ -77,32 +73,23 @@ public class WaveLineView extends RenderView {
         this.pathFuncs = pathFuncs;
     }
 
-    //不同函数曲线系数
-    private float[] pathFuncs = {
-            -0.4f, 0.6f
-    };
-
-    //采样点X坐标
+    // 不同函数曲线系数
+    private float[] pathFuncs = {-0.4f, 0.6f};
+    // 采样点X坐标
     private float[] samplingX;
-    //采样点位置映射到[-2,2]之间
+    // 采样点位置映射到[-2,2]之间
     private float[] mapX;
-    //画布宽高
+    // 画布宽高
     private int width, height;
-    //画布中心的高度
+    // 画布中心的高度
     private int centerHeight;
-    //振幅
+    // 振幅
     private float amplitude;
-    //存储衰变系数
-    private SparseArray<Double> recessionFuncs = new SparseArray<>();
-    //连线动画结束标记
-    private boolean isPrepareLineAnimEnd = false;
-    //连线动画位移
-    private int lineAnimX = 0;
-    //渐入动画结束标记
-    private boolean isPrepareAlphaAnimEnd = false;
-    //渐入动画百分比值[0,1f]
+    // 存储衰变系数
+    private final SparseArray<Double> recessionFuncs = new SparseArray<>();
+    // 渐入动画百分比值[0,1f]
     private float prepareAlpha = 0f;
-    //是否开启准备动画
+    // 是否开启准备动画
     private boolean isOpenPrepareAnim = false;
 
     private boolean isTransparentMode = false;
@@ -125,8 +112,6 @@ public class WaveLineView extends RenderView {
         backGroundColor = t.getColor(R.styleable.WaveLineView_wlvBackgroundColor, Color.WHITE);
         samplingSize = t.getInt(R.styleable.WaveLineView_wlvSamplingSize, DEFAULT_SAMPLING_SIZE);
         lineColor = t.getColor(R.styleable.WaveLineView_wlvLineColor, Color.parseColor("#FF9162E7"));
-        thickLineWidth = (int) t.getDimension(R.styleable.WaveLineView_wlvThickLineWidth, 1);
-        fineLineWidth = (int) t.getDimension(R.styleable.WaveLineView_wlvFineLineWidth, 2);
         offsetSpeed = t.getFloat(R.styleable.WaveLineView_wlvMoveSpeed, DEFAULT_OFFSET_SPEED);
         sensibility = t.getInt(R.styleable.WaveLineView_wlvSensibility, DEFAULT_SENSIBILITY);
         isTransparentMode = backGroundColor == Color.TRANSPARENT;
@@ -251,10 +236,7 @@ public class WaveLineView extends RenderView {
      * 初始化参数
      */
     private void initParameters() {
-        lineAnimX = 0;
         prepareAlpha = 0f;
-        isPrepareLineAnimEnd = false;
-        isPrepareAlphaAnimEnd = false;
         samplingX = null;
     }
 
@@ -300,24 +282,24 @@ public class WaveLineView extends RenderView {
         width = canvas.getWidth();
         height = canvas.getHeight();
         centerHeight = height >> 1;
-        //振幅为高度的1/4
+        // 振幅为高度的1/4
         amplitude = height / 1.5f;
 
-        //适合View的理论最大音量值，和音量不属于同一概念
+        // 适合View的理论最大音量值，和音量不属于同一概念
         perVolume = sensibility * 0.35f;
 
-        //初始化采样点及映射
-        //这里因为包括起点和终点，所以需要+1
+        // 初始化采样点及映射
+        // 这里因为包括起点和终点，所以需要+1
         samplingX = new float[samplingSize + 1];
         mapX = new float[samplingSize + 1];
-        //确定采样点之间的间距
+        // 确定采样点之间的间距
         float gap = width / (float) samplingSize;
-        //采样点的位置
+        // 采样点的位置
         float x;
         for (int i = 0; i <= samplingSize; i++) {
             x = i * gap;
             samplingX[i] = x;
-            //将采样点映射到[-2，2]
+            // 将采样点映射到[-2，2]
             mapX[i] = (x / (float) width) * 4 - 2;
         }
 
@@ -354,7 +336,7 @@ public class WaveLineView extends RenderView {
      * you can use negative number to make the animation from right to left
      * the default value is 290F,the smaller, the faster
      *
-     * @param moveSpeed
+     * @param moveSpeed 移动速度
      */
     public void setMoveSpeed(float moveSpeed) {
         this.offsetSpeed = moveSpeed;
@@ -384,7 +366,7 @@ public class WaveLineView extends RenderView {
      * Sensitivity, the bigger the more sensitive [1,10]
      * the default value is 5
      *
-     * @param sensibility
+     * @param sensibility 灵敏度
      */
     public void setSensibility(int sensibility) {
         this.sensibility = sensibility;
