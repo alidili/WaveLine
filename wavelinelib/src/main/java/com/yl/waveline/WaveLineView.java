@@ -109,7 +109,7 @@ public class WaveLineView extends RenderView {
 
     private void initAttr(AttributeSet attrs) {
         TypedArray t = getContext().obtainStyledAttributes(attrs, R.styleable.WaveLineView);
-        backGroundColor = t.getColor(R.styleable.WaveLineView_wlvBackgroundColor, Color.WHITE);
+        backGroundColor = t.getColor(R.styleable.WaveLineView_wlvBackgroundColor, Color.TRANSPARENT);
         samplingSize = t.getInt(R.styleable.WaveLineView_wlvSamplingSize, DEFAULT_SAMPLING_SIZE);
         lineColor = t.getColor(R.styleable.WaveLineView_wlvLineColor, Color.parseColor("#FF9162E7"));
         offsetSpeed = t.getFloat(R.styleable.WaveLineView_wlvMoveSpeed, DEFAULT_OFFSET_SPEED);
@@ -178,12 +178,16 @@ public class WaveLineView extends RenderView {
         canvas.drawPath(paths.get(1), paint);
     }
 
-    // 检查音量是否合法
+    /**
+     * 检查音量是否合法
+     */
     private void checkVolumeValue() {
         if (targetVolume > 100) targetVolume = 100;
     }
 
-    // 检查灵敏度值是否合法
+    /**
+     * 检查灵敏度值是否合法
+     */
     private void checkSensibilityValue() {
         if (sensibility > 10) sensibility = 10;
         if (sensibility < 1) sensibility = 1;
@@ -283,7 +287,7 @@ public class WaveLineView extends RenderView {
         height = canvas.getHeight();
         centerHeight = height >> 1;
         // 振幅为高度的1/4
-        amplitude = height / 1.5f;
+        amplitude = height / 1.2f;
 
         // 适合View的理论最大音量值，和音量不属于同一概念
         perVolume = sensibility * 0.35f;
